@@ -1,21 +1,34 @@
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import text
+from sqlalchemy import insert, select, text
+from sqlalchemy.orm import Session
 
-from . import models  # noqa: F401  (ensures models are registered with Base)
-from .db import Base, engine
+from .db import Base, engine, get_db
+from .models import sample_fruits
 
 logger = logging.getLogger("uvicorn.error")
+
+SEED_FRUITS = [
+    {"name": "Apple", "color": "red"},
+    {"name": "Banana", "color": "yellow"},
+    {"name": "Kiwi", "color": "green"},
+    {"name": "Blueberry", "color": "blue"},
+    {"name": "Plum", "color": "purple"},
+]
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Create tables for any models defined in models.py (no-op if none).
+    # Create tables for any models defined in models.py, and seed the
+    # sample table if it's empty.
     try:
         Base.metadata.create_all(engine)
+        with engine.begin() as conn:
+            if conn.execute(select(sample_fruits).limit(1)).first() is None:
+                conn.execute(insert(sample_fruits), SEED_FRUITS)
     except Exception:
         logger.warning(
             "Could not connect to Postgres — is it running? Start it with: docker compose up -d"
@@ -44,3 +57,9 @@ def health():
     except Exception as exc:
         database = f"error: {exc.__class__.__name__}"
     return {"status": "ok", "database": database}
+
+
+@app.get("/fruits")
+def list_fruits(db: Session = Depends(get_db)):
+    rows = db.execute(select(sample_fruits)).mappings().all()
+    return [dict(row) for row in rows]

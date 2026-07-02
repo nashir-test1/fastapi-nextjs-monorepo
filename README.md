@@ -51,7 +51,7 @@ npm install
 npm run dev
 ```
 
-**4. Verify:** open <http://localhost:4321> — you should see three green dots (frontend, backend, database). Interactive API docs are at <http://localhost:8765/docs>.
+**4. Verify:** open <http://localhost:4321> — the page shows "ok" for frontend, backend, and database. Interactive API docs are at <http://localhost:8765/docs>.
 
 There's also a `Makefile` with shortcuts: `make db`, `make backend`, `make frontend`, `make psql`, `make db-reset`.
 
@@ -62,15 +62,23 @@ docker-compose.yml      # Postgres (the only containerized service)
 backend/
   pyproject.toml        # deps: fastapi, sqlalchemy, psycopg
   app/
-    main.py             # FastAPI app, CORS, /health endpoint
+    main.py             # FastAPI app, CORS, /health + /fruits endpoints
     db.py               # engine, SessionLocal, Base, get_db dependency
-    models.py           # define your SQLAlchemy models here
+    models.py           # SQLAlchemy models/tables (contains the sample table)
 frontend/
   src/
-    pages/              # Next.js pages router
+    pages/              # Next.js pages router (index + /fruits sample page)
     lib/api.ts          # apiUrl() helper for calling the backend
     styles/globals.css  # Tailwind entry point
 ```
+
+## Sample feature: fruits
+
+A tiny end-to-end example showing the full path DB → API → UI, useful as a pattern to copy (and safe to delete):
+
+- **Table**: `sample_fruits` in `backend/app/models.py`, seeded with a few rows on backend startup
+- **API**: `GET /fruits` in `backend/app/main.py` (try it at http://localhost:8765/docs)
+- **UI**: http://localhost:4321/fruits (`frontend/src/pages/fruits.tsx`) renders the table contents
 
 ## Common tasks
 
@@ -107,6 +115,6 @@ docker compose down -v && docker compose up -d
 
 ## Troubleshooting
 
-- **Page shows a red dot for "Backend"** — the backend isn't running or crashed; check its terminal.
-- **Page shows a red dot for "Database"** — Postgres isn't up. Run `docker compose up -d` and give it a couple of seconds, then refresh.
+- **Page shows an error for "Backend"** — the backend isn't running or crashed; check its terminal.
+- **Page shows an error for "Database"** — Postgres isn't up. Run `docker compose up -d` and give it a couple of seconds, then refresh.
 - **Port already in use** — something else is on 4321/8765/6543. Ports are set in `frontend/package.json` (`dev` script), the backend run command, and `docker-compose.yml`.
