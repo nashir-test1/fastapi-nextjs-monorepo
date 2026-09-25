@@ -5,7 +5,7 @@ from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 DATABASE_URL = os.environ.get(
     "DATABASE_URL",
-    "postgresql+psycopg://postgres:postgres@localhost:6543/app",
+    "sqlite:////tmp/nas112-fixture.db",
 )
 
 engine = create_engine(DATABASE_URL)
