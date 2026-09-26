@@ -63,3 +63,6 @@ def health():
 def list_fruits(db: Session = Depends(get_db)):
     rows = db.execute(select(sample_fruits)).mappings().all()
     return [dict(row) for row in rows]
+
+
+# NAS-112: harmless watched-source push for selective rebuild evidence.
