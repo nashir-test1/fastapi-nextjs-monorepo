@@ -66,3 +66,8 @@ def list_fruits(db: Session = Depends(get_db)):
 
 
 # NAS-112: harmless watched-source push for selective rebuild evidence.
+
+
+@app.get("/")
+def root_health():
+    return {"status": "ok"}
