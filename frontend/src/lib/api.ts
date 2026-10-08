@@ -1,6 +1,8 @@
-const API_URL = process.env.API_URL ?? "http://localhost:8765";
-
-/** Build a full URL to a backend endpoint, e.g. apiUrl("/health"). */
+/**
+ * Route browser requests through this Next.js service. The API handler reads
+ * API_URL at runtime, so each deployed service can keep its own backend target
+ * without exposing it in the client bundle or baking it into the image.
+ */
 export function apiUrl(path: string): string {
-  return `${API_URL}${path}`;
+  return `/api/backend${path}`;
 }
